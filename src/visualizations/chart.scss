@@ -1,0 +1,6 @@
+.item {
+  fill: red;
+  &:hover {
+    fill: white !important;
+  }
+}
