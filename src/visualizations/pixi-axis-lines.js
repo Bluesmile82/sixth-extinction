@@ -2,32 +2,25 @@ import React from "react";
 import './chart.scss';
 import * as PIXI from 'pixi.js';
 import * as d3 from 'd3';
-import { Text } from '@inlet/react-pixi';
+import { Sprite } from '@inlet/react-pixi';
 
-const PixiAxis = ({ data, width, margin, xScale }) => {
+const PixiAxis = ({ data, width, margin, height, xScale }) => {
   const extent = d3.extent(data, d => parseInt(d.year, 10));
   const years = [];
   for (let year = extent[0]; year < extent[1]; year += 10) {
-    if (year % 50 === 0) {
+    if (year % 10 === 0) {
       years.push(year);
     }
   }
 
   const textYears = years.map(y => (
-    <Text
-      text={y}
-      anchor={0.5}
+    <Sprite
+      texture={PIXI.Texture.WHITE}
+      tint={0x555555}
       x={xScale(y)}
       y={10}
-      isSprite
-      style={
-        new PIXI.TextStyle({
-          fontFamily: '"Source Sans Pro", Helvetica, sans-serif',
-          fill: 0xffffff,
-          fontSize: 12,
-          align: 'center'
-        })
-      }
+      width={1}
+      height={height}
     />
   ));
   return textYears;

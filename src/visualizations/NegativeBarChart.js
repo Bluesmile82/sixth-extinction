@@ -5,6 +5,7 @@ import "./chart.scss";
 import Specie from './specie-pixi';
 import { Stage } from '@inlet/react-pixi';
 import PixiAxis from './pixi-axis';
+import PixiAxisLines from './pixi-axis-lines';
 
 const width = 650;
 const height = 400;
@@ -13,15 +14,14 @@ const margin = { top: 20, right: 5, bottom: 20, left: 35 };
 
 const NegativeBarChart = ({ data, setTooltip }) => {
   const [squares, changeSquares] = useState([]);
+  const extent = d3.extent(data, d => parseInt(d.year, 10));
+  const xScale = d3
+    .scaleTime()
+    .domain(extent)
+    .range([-margin.left, width - margin.right]);
 
   useEffect(() => {
     const groupedData = groupBy(data, "year");
-    const extent = d3.extent(data, d => parseInt(d.year, 10));
-    const xScale = d3
-      .scaleTime()
-      .domain(extent)
-      .range([-margin.left, width - margin.right]);
-
     const yearCount = {};
     const squares = [];
     Object.entries(groupedData).forEach(d => {
@@ -48,11 +48,6 @@ const NegativeBarChart = ({ data, setTooltip }) => {
   const axisRef = useRef();
 
   useEffect(() => {
-    const extent = d3.extent(data, d => parseInt(d.year, 10));
-    const xScale = d3
-    .scaleTime()
-    .domain(extent)
-    .range([0, width - margin.right]);
     const xAxis = d3
       .axisTop()
       .tickFormat(d3.format(""))
@@ -64,7 +59,6 @@ const NegativeBarChart = ({ data, setTooltip }) => {
   const [seconds, setSeconds] = useState(0);
 
   useEffect(() => {
-    // const extent = d3.extent(data, d => parseInt(d.year, 10));
     // const interval = setInterval(() => {
     //   if (seconds + extent[0] - 125 < extent[1]) {
     //     setSeconds(seconds => seconds + 1);
@@ -104,7 +98,14 @@ const NegativeBarChart = ({ data, setTooltip }) => {
         <g ref={axisRef} transform={`translate(0, ${margin.bottom})`} />
       </svg>
       <Stage width={width} height={height}>
-        <PixiAxis data={data} width={width} margin={margin} />
+        <PixiAxis data={data} width={width} margin={margin} xScale={xScale} />
+        <PixiAxisLines
+          data={data}
+          width={width}
+          margin={margin}
+          height={height}
+          xScale={xScale}
+        />
         {squares.map(d => (
           <Specie
             key={d.name}

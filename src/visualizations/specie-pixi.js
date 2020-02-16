@@ -4,11 +4,10 @@ import { Sprite } from '@inlet/react-pixi';
 import * as PIXI from 'pixi.js';
 
 const height = 400;
-const boxHeight = 10;
-const image = 'https://i.imgur.com/IaUrttj.png';
+const boxHeight = 5;
 
 const Specie = ({ d, shouldStart, seconds, updateTooltip }) => {
-  const { name, x, y, fill } = d;
+  const { name, x, y, fill, year } = d;
   const [updatedFill, setFill] = useState(fill);
   const [updatedStroke, setStroke] = useState('none');
 
@@ -21,6 +20,7 @@ const Specie = ({ d, shouldStart, seconds, updateTooltip }) => {
     <Sprite
       texture={PIXI.Texture.WHITE}
       interactive
+      anchor={0.5}
       key={`${name}${x}${y}`}
       tint={updatedFill}
       x={x}
@@ -30,7 +30,7 @@ const Specie = ({ d, shouldStart, seconds, updateTooltip }) => {
       mouseover={e => {
         setFill(0xffffff);
         setStroke('white');
-        updateTooltip({ x, y, name });
+        updateTooltip({ x, y, name, year });
       }}
       mouseout={e => {
         setFill(fill);
