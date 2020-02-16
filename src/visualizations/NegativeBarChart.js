@@ -38,7 +38,7 @@ const NegativeBarChart = ({ data, setTooltip }) => {
             fill: 0xff0000,
             stroke: '#fff',
             year,
-            name
+            ...animal
           });
         }
       });
@@ -61,13 +61,20 @@ const NegativeBarChart = ({ data, setTooltip }) => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setSeconds(seconds => seconds + 1);
-    }, 1);
+      if (seconds < extent[1]) { setSeconds(seconds => seconds + 5) };
+    }, 10);
     return () => clearInterval(interval);
   }, [seconds]);
 
   const shouldStart = x => seconds >= x;
-
+  const getY = (speciesClassName) => {
+    switch (speciesClassName) {
+      case 'AVES':
+        return 40;
+      default:
+        return 70
+    }
+  };
   return (
     <React.Fragment>
       <Stage width={width} height={height}>
@@ -93,16 +100,17 @@ const NegativeBarChart = ({ data, setTooltip }) => {
           width={50}
           height={50}
         />
-        {squares.map(d => (
+        {squares.map(d =>
           <Specie
             key={d.name}
             d={d}
-            y={70}
+            y={getY(d.speciesClassName)}
+            finalY={100}
             shouldStart={shouldStart(d.x)}
             seconds={seconds}
             updateTooltip={setTooltip}
           />
-        ))}
+        )}
       </Stage>
     </React.Fragment>
   );

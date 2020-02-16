@@ -3,11 +3,17 @@ import './chart.scss';
 import { Sprite } from '@inlet/react-pixi';
 import * as PIXI from 'pixi.js';
 
-const height = 400;
 const boxHeight = 5;
 
-const Specie = ({ d, shouldStart, seconds, updateTooltip, y: initialY }) => {
-  const { name, x, y, fill, year } = d;
+const Specie = ({
+  d,
+  shouldStart,
+  seconds,
+  updateTooltip,
+  y: initialY,
+  finalY
+}) => {
+  const { name, x, y, fill, year, speciesClassName } = d;
   const [updatedFill, setFill] = useState(fill);
   const [updatedStroke, setStroke] = useState('none');
   const [startTime, setStartTime] = useState(1000);
@@ -15,11 +21,11 @@ const Specie = ({ d, shouldStart, seconds, updateTooltip, y: initialY }) => {
     if (shouldStart) {
       setStartTime(seconds);
     }
-  }, [shouldStart])
+  }, [shouldStart]);
   const getY = () => {
-    const finalY = height / 2 + initialY + y;
+    const lastPositionY = finalY + y;
     const remainingTime = seconds - startTime;
-    const countdown = finalY > remainingTime ? remainingTime : finalY;
+    const countdown = lastPositionY > remainingTime ? remainingTime : lastPositionY;
     return shouldStart ? countdown : 0;
   };
   return (
@@ -36,7 +42,7 @@ const Specie = ({ d, shouldStart, seconds, updateTooltip, y: initialY }) => {
       mouseover={e => {
         setFill(0xffffff);
         setStroke('white');
-        updateTooltip({ x, name, year });
+        updateTooltip({ x, name, year, speciesClassName });
       }}
       mouseout={e => {
         setFill(fill);
