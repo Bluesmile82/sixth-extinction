@@ -4,7 +4,7 @@ import * as PIXI from 'pixi.js';
 import * as d3 from 'd3';
 import { Text } from '@inlet/react-pixi';
 
-const PixiAxis = ({ data, width, margin, xScale }) => {
+const PixiAxis = ({ data, xScale, y }) => {
   const extent = d3.extent(data, d => parseInt(d.year, 10));
   const years = [];
   for (let year = extent[0]; year < extent[1]; year += 10) {
@@ -13,12 +13,12 @@ const PixiAxis = ({ data, width, margin, xScale }) => {
     }
   }
 
-  const textYears = years.map(y => (
+  const textYears = years.map(year => (
     <Text
-      text={y}
+      text={year}
       anchor={0.5}
-      x={xScale(y)}
-      y={10}
+      x={xScale(year)}
+      y={y}
       isSprite
       style={
         new PIXI.TextStyle({
