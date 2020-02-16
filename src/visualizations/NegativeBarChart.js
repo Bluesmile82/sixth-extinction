@@ -75,6 +75,7 @@ const NegativeBarChart = ({ data, setTooltip }) => {
           data={data}
           xScale={xScale}
           y={10}
+          seconds={seconds}
         />
         <PixiAxisLines
           data={data}
