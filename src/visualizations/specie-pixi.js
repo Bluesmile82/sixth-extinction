@@ -19,7 +19,7 @@ const Specie = ({ d, shouldStart, seconds, updateTooltip }) => {
   };
   return (
     <Sprite
-      image={image}
+      texture={PIXI.Texture.WHITE}
       interactive
       key={`${name}${x}${y}`}
       tint={updatedFill}

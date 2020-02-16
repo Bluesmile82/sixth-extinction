@@ -4,6 +4,7 @@ import { groupBy } from "lodash";
 import "./chart.scss";
 import Specie from './specie-pixi';
 import { Stage } from '@inlet/react-pixi';
+import PixiAxis from './pixi-axis';
 
 const width = 650;
 const height = 400;
@@ -11,7 +12,7 @@ const boxHeight = 5;
 const margin = { top: 20, right: 5, bottom: 20, left: 35 };
 
 const NegativeBarChart = ({ data, setTooltip }) => {
-  const [bars, changeBars] = useState([]);
+  const [squares, changeSquares] = useState([]);
 
   useEffect(() => {
     const groupedData = groupBy(data, "year");
@@ -22,7 +23,7 @@ const NegativeBarChart = ({ data, setTooltip }) => {
       .range([-margin.left, width - margin.right]);
 
     const yearCount = {};
-    const bars = [];
+    const squares = [];
     Object.entries(groupedData).forEach(d => {
       const [year, yearAnimals] = d;
       yearAnimals.forEach(animal => {
@@ -30,7 +31,7 @@ const NegativeBarChart = ({ data, setTooltip }) => {
 
         yearCount[year] = yearCount[year] ? yearCount[year] + 1 : 1;
         if (year) {
-          bars.push({
+          squares.push({
             x: xScale(parseInt(year, 10)),
             y: yearCount[year] * boxHeight,
             fill: 0xff0000,
@@ -41,7 +42,7 @@ const NegativeBarChart = ({ data, setTooltip }) => {
         }
       });
     });
-    changeBars(bars);
+    changeSquares(squares);
   }, [data]);
 
   const axisRef = useRef();
@@ -49,9 +50,9 @@ const NegativeBarChart = ({ data, setTooltip }) => {
   useEffect(() => {
     const extent = d3.extent(data, d => parseInt(d.year, 10));
     const xScale = d3
-      .scaleTime()
-      .domain(extent)
-      .range([0, width - margin.right]);
+    .scaleTime()
+    .domain(extent)
+    .range([0, width - margin.right]);
     const xAxis = d3
       .axisTop()
       .tickFormat(d3.format(""))
@@ -60,7 +61,6 @@ const NegativeBarChart = ({ data, setTooltip }) => {
       .call(xAxis)
       .call(g => g.select(".domain").remove());
   }, [axisRef, data]);
-
   const [seconds, setSeconds] = useState(0);
 
   useEffect(() => {
@@ -104,7 +104,8 @@ const NegativeBarChart = ({ data, setTooltip }) => {
         <g ref={axisRef} transform={`translate(0, ${margin.bottom})`} />
       </svg>
       <Stage width={width} height={height}>
-        {bars.map(d => (
+        <PixiAxis data={data} width={width} margin={margin} />
+        {squares.map(d => (
           <Specie
             key={d.name}
             d={d}
