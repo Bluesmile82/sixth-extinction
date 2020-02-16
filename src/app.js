@@ -25,6 +25,7 @@ const App = () => {
             <p>{tooltip && tooltip.name}</p>
             <p>{tooltip && tooltip.year}</p>
             <p>{tooltip && tooltip.speciesClassName}</p>
+            <p>{tooltip && tooltip.kingdomName}</p>
           </div>
         )}
         <NegativeBarChart data={data} setTooltip={setTooltip} />

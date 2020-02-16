@@ -3,17 +3,18 @@ import './chart.scss';
 import { Sprite } from '@inlet/react-pixi';
 import * as PIXI from 'pixi.js';
 
-const boxHeight = 5;
-
 const Specie = ({
   d,
   shouldStart,
   seconds,
   updateTooltip,
   y: initialY,
-  finalY
+  finalY,
+  boxHeight,
+  image,
+  selection
 }) => {
-  const { name, x, y, fill, year, speciesClassName } = d;
+  const { name, x, y, fill, kingdomName, speciesClassName } = d;
   const [updatedFill, setFill] = useState(fill);
   const [updatedStroke, setStroke] = useState('none');
   const [startTime, setStartTime] = useState(1000);
@@ -24,25 +25,34 @@ const Specie = ({
   }, [shouldStart]);
   const getY = () => {
     const lastPositionY = finalY + y;
-    const remainingTime = seconds - startTime;
-    const countdown = lastPositionY > remainingTime ? remainingTime : lastPositionY;
-    return shouldStart ? countdown : 0;
+    const remainingTime = seconds - startTime + initialY;
+    const countdown =
+      lastPositionY > remainingTime ? remainingTime : lastPositionY;
+    return shouldStart ? countdown : initialY;
   };
   return (
     <Sprite
-      texture={PIXI.Texture.WHITE}
+      image={image}
+      texture={image ? undefined : PIXI.Texture.WHITE}
       interactive
       anchor={0.5}
+      alpha={0.5}
       key={`${name}${x}`}
-      tint={updatedFill}
+      tint={
+        !selection ||
+        kingdomName === selection ||
+        speciesClassName === selection
+          ? updatedFill
+          : 0x000000
+      }
       x={x}
-      y={initialY + getY()}
+      y={getY()}
       width={boxHeight}
       height={boxHeight}
       mouseover={e => {
         setFill(0xffffff);
         setStroke('white');
-        updateTooltip({ x, name, year, speciesClassName });
+        updateTooltip(d);
       }}
       mouseout={e => {
         setFill(fill);
