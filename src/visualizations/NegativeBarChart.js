@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import * as d3 from "d3";
-import { groupBy } from "lodash";
+import { groupBy, sortBy } from "lodash";
 import "./chart.scss";
 import Specie from './specie-pixi';
 import { Stage, Sprite, Text } from '@inlet/react-pixi';
@@ -8,50 +8,58 @@ import PixiAxis from './pixi-axis';
 import PixiAxisLines from './pixi-axis-lines';
 import * as PIXI from 'pixi.js';
 import man from '../images/man.png';
+import useInterval from '@use-it/interval';
 import plant from '../images/plant.png';
+import { useTick, useApp } from '@inlet/react-pixi';
 
 const layers = {
   plants: {
     kingdom: 'PLANTAE',
-    y: 80,
-    color: 0x469e5d,
-    image: plant
+    y: 160,
+    color: 0xff0000
   },
   birds: {
     class: 'AVES',
-    y: 100,
-    color: 0xffff00
+    y: 200,
+    color: 0xff0000
   },
   mammals: {
     class: 'MAMMALIA',
-    y: 120,
-    color: 0x775577
+    y: 240,
+    color: 0xff0000
   },
   insects: {
     class: 'INSECTA',
-    y: 140,
-    color: 0xff33ff
+    y: 280,
+    color: 0xff0000
   },
   amphibians: {
-    class: 'AMPHIBIA',
-    y: 160,
-    color: 0x3333ff
+    class: 'REPTILIA',
+    y: 320,
+    color: 0xff0000
   },
   reptiles: {
     class: 'REPTILIA',
-    y: 180,
-    color: 0x44aa77
+    y: 360,
+    color: 0xff0000
   },
   gastropodos: {
     class: 'GASTROPODA',
-    y: 200,
-    color: 0xffffff
+    y: 400,
+    color: 0xff0000
+  },
+  others: {
+    class: 'OTHERS',
+    y: 440,
+    color: 0xff0000
   }
 };
+
+const squarePadding = 2;
 const width = 1200;
 const height = 800;
 const boxHeight = 5;
-const margin = { top: 20, right: 5, bottom: 20, left: 20 };
+const margin = { top: 20, right: 50, bottom: 20, left: 50 };
 
 const NegativeBarChart = ({ data, setTooltip }) => {
   const [squares, changeSquares] = useState([]);
@@ -82,8 +90,18 @@ const NegativeBarChart = ({ data, setTooltip }) => {
     return image;
   };
 
+  const getY = (speciesClassName, kingdomName) => {
+    let y = 400;
+    Object.values(layers).forEach(v => {
+      if (kingdomName === v.kingdom || speciesClassName === v.class) {
+        y = v.y;
+      }
+    });
+    return y;
+  };
+
   useEffect(() => {
-    const groupedData = groupBy(data, "year");
+    const groupedData = groupBy(sortBy(data, 'speciesClassName'), 'year');
     const yearCount = {};
     const squares = [];
     Object.entries(groupedData).forEach(d => {
@@ -96,7 +114,7 @@ const NegativeBarChart = ({ data, setTooltip }) => {
         if (year) {
           squares.push({
             x: xScale(parseInt(year, 10)),
-            y: yearCount[year] * (boxHeight + 2),
+            y: yearCount[year] * (boxHeight + squarePadding),
             fill: getFill(speciesClassName, kingdomName),
             year,
             ...animal
@@ -120,23 +138,14 @@ const NegativeBarChart = ({ data, setTooltip }) => {
   }, [axisRef, data]);
   const [seconds, setSeconds] = useState(0);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (seconds < extent[1]) { setSeconds(seconds => seconds + 10) };
-    }, 10);
-    return () => clearInterval(interval);
-  }, [seconds]);
+  useInterval(() => {
+    if (seconds < 1500) {
+      setSeconds(seconds => seconds + 3);
+    }
+  }, 10);
 
   const shouldStart = x => seconds >= x;
-  const getY = (speciesClassName, kingdomName) => {
-    let y = 200;
-    Object.values(layers).forEach(v => {
-      if (kingdomName === v.kingdom || speciesClassName === v.class) {
-        y = v.y;
-      }
-    });
-    return y;
-  };
+
   const renderXAxis = () =>
     Object.values(layers).map(v => (
       <Text
@@ -161,29 +170,55 @@ const NegativeBarChart = ({ data, setTooltip }) => {
         }
       />
     ));
+    const finalSeconds = 1180;
   return (
     <React.Fragment>
-      <Stage width={width} height={height}>
+      <Stage
+        width={width}
+        height={height}
+        options={{
+          resolution: 1,
+          roundPixel: true,
+          forceFXAA: true,
+          sharedTicker: true
+        }}
+      >
         <PixiAxis data={data} xScale={xScale} y={10} seconds={seconds} />
         {/* <PixiAxisLines data={data} height={height} xScale={xScale} y={70} /> */}
-        {renderXAxis()}
+        {/* {renderXAxis()} */}
         <Sprite
           image={man}
-          tint={0xffffff}
           interactive
           anchor={0.5}
-          x={seconds}
+          x={seconds < finalSeconds ? seconds : finalSeconds}
           y={50}
           width={50}
           height={50}
         />
+        {Object.values(layers).map(v => (
+          <Sprite
+            image={plant}
+            interactive
+            anchor={0.5}
+            x={seconds < finalSeconds ? seconds : finalSeconds}
+            y={v.y}
+            width={30}
+            height={30}
+            mouseover={e => {
+              setSelection(v.kingdom || v.class);
+            }}
+            mouseout={e => {
+              setSelection(undefined);
+            }}
+          />
+        ))}
         {squares.map(d => (
           <Specie
             key={d.name}
             image={getImage(d.speciesClassName, d.kingdomName)}
             d={d}
             y={getY(d.speciesClassName, d.kingdomName)}
-            finalY={300}
+            finalY={480}
             shouldStart={shouldStart(d.x)}
             seconds={seconds}
             selection={selection}
